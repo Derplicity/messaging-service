@@ -1,0 +1,2816 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Messaging Service API",
+    "description": "A service providing private and group messaging between clients.",
+    "license": {
+      "name": "MIT",
+      "url": "https://www.mit.edu/~amini/LICENSE.md"
+    },
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:{port}/api/v1/",
+      "description": "Local Development Server",
+      "variables": {
+        "port": {
+          "default": "3001"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "Author",
+      "description": "Author operations"
+    },
+    {
+      "name": "Room",
+      "description": "Room operations"
+    },
+    {
+      "name": "Message",
+      "description": "Message operations"
+    }
+  ],
+  "paths": {
+    "/authors": {
+      "post": {
+        "tags": [
+          "Author"
+        ],
+        "summary": "Create Author",
+        "description": "Create a new Author with the given body and return the new Author.",
+        "operationId": "CreateAuthor",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "title": "CreateAuthorObject",
+                "type": "object",
+                "required": ["_id", "firstName", "lastName"],
+                "properties": {
+                  "_id": {
+                    "type": "uuid"
+                  },
+                  "firstName": {
+                    "type": "string"
+                  },
+                  "lastName": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "_id": "350daee5-6a5f-4489-a2a7-d4a2181cc12b",
+                "firstName": "John",
+                "lastName": "Doe"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "The new Author.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "author": {
+                      "title": "AuthorObject",
+                      "type": "object",
+                      "properties": {
+                        "_id": {
+                          "type": "uuid"
+                        },
+                        "firstName": {
+                          "type": "string"
+                        },
+                        "lastName": {
+                          "type": "string"
+                        },
+                        "isArchived": {
+                          "type": "boolean"
+                        },
+                        "createdAt": {
+                          "type": "date-time"
+                        },
+                        "updatedAt": {
+                          "type": "date-time"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "author": {
+                    "_id": "350daee5-6a5f-4489-a2a7-d4a2181cc12b",
+                    "firstName": "John",
+                    "lastName": "Doe",
+                    "isArchived": false,
+                    "createdAt": "2021-02-21T07:13:31.923Z",
+                    "updatedAt": "2021-02-21T07:13:31.923Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A validation error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "title": "ErrorObject",
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "title": "ErrorFieldsObject",
+                          "type": "object",
+                          "properties": {
+                            "_id": {
+                              "type": "string"
+                            },
+                            "firstName": {
+                              "type": "string"
+                            },
+                            "lastName": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "error": {
+                    "message": "Invalid fields.",
+                    "fields": {
+                      "_id": "required",
+                      "firstName": "required",
+                      "lastName": "required"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "A system error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "title": "ErrorObject",
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "error": {
+                    "message": "An unknown error occurred."
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Author"
+        ],
+        "summary": "Get Authors",
+        "description": "Retrieve a list of Authors given some query parameters.",
+        "operationId": "GetAuthors",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "includeArchived",
+            "schema": {
+              "type": "integer"
+            },
+            "default": 0,
+            "description": "Whether to include (1) or exclude (0) archived Authors."
+          },
+          {
+            "in": "query",
+            "name": "createdBefore",
+            "schema": {
+              "type": "integer"
+            },
+            "default": 8640000000000000,
+            "description": "Will only retrieve Authors created before this Date (in milliseconds)."
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer"
+            },
+            "default": 10,
+            "description": "Maximum number of Authors to retrieve."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The retrieved Authors.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "authors": {
+                      "title": "AuthorArray",
+                      "type": "array",
+                      "items": {
+                        "title": "AuthorObject",
+                        "type": "object",
+                        "properties": {
+                          "_id": {
+                            "type": "uuid"
+                          },
+                          "firstName": {
+                            "type": "string"
+                          },
+                          "lastName": {
+                            "type": "string"
+                          },
+                          "isArchived": {
+                            "type": "boolean"
+                          },
+                          "createdAt": {
+                            "type": "date-time"
+                          },
+                          "updatedAt": {
+                            "type": "date-time"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "authors": [
+                    {
+                      "_id": "350daee5-6a5f-4489-a2a7-d4a2181cc12b",
+                      "firstName": "John",
+                      "lastName": "Doe",
+                      "isArchived": false,
+                      "createdAt": "2021-02-21T07:13:31.923Z",
+                      "updatedAt": "2021-02-28T07:15:39.126Z"
+                    },
+                    {
+                      "_id": "d8949886-c908-46af-ab49-f7cafdd25232",
+                      "firstName": "Sam",
+                      "lastName": "Smith",
+                      "isArchived": false,
+                      "createdAt": "2021-03-21T07:13:31.923Z",
+                      "updatedAt": "2021-03-28T07:15:39.126Z"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "A system error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "title": "ErrorObject",
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "error": {
+                    "message": "An unknown error occurred."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/authors/{id}": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "schema": {
+            "type": "uuid"
+          },
+          "description": "Author ID"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Author"
+        ],
+        "summary": "Get Author",
+        "description": "Get an Author with the given ID.",
+        "operationId": "GetAuthor",
+        "responses": {
+          "200": {
+            "description": "The retrieved Author.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "author": {
+                      "title": "AuthorObject",
+                      "type": "object",
+                      "properties": {
+                        "_id": {
+                          "type": "uuid"
+                        },
+                        "firstName": {
+                          "type": "string"
+                        },
+                        "lastName": {
+                          "type": "string"
+                        },
+                        "isArchived": {
+                          "type": "boolean"
+                        },
+                        "createdAt": {
+                          "type": "date-time"
+                        },
+                        "updatedAt": {
+                          "type": "date-time"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "author": {
+                      "_id": "350daee5-6a5f-4489-a2a7-d4a2181cc12b",
+                      "firstName": "John",
+                      "lastName": "Doe",
+                      "isArchived": false,
+                      "createdAt": "2021-02-21T07:13:31.923Z",
+                      "updatedAt": "2021-02-28T07:15:39.126Z"
+                    }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "A not found error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "title": "ErrorObject",
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "error": {
+                    "message": "Author not found."
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "A system error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "title": "ErrorObject",
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "error": {
+                    "message": "An unknown error occurred."
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Author"
+        ],
+        "summary": "Update Author",
+        "description": "Update an Author with the given body and return the updated Author.",
+        "operationId": "UpdateAuthor",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "title": "CreateAuthorObject",
+                "type": "object",
+                "required": ["firstName", "lastName"],
+                "properties": {
+                  "firstName": {
+                    "type": "string"
+                  },
+                  "lastName": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "firstName": "Sam",
+                "lastName": "Smith"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The updated Author.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "author": {
+                      "title": "AuthorObject",
+                      "type": "object",
+                      "properties": {
+                        "_id": {
+                          "type": "uuid"
+                        },
+                        "firstName": {
+                          "type": "string"
+                        },
+                        "lastName": {
+                          "type": "string"
+                        },
+                        "isArchived": {
+                          "type": "boolean"
+                        },
+                        "createdAt": {
+                          "type": "date-time"
+                        },
+                        "updatedAt": {
+                          "type": "date-time"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "author": {
+                    "_id": "350daee5-6a5f-4489-a2a7-d4a2181cc12b",
+                    "firstName": "Sam",
+                    "lastName": "Smith",
+                    "isArchived": false,
+                    "createdAt": "2021-02-21T07:13:31.923Z",
+                    "updatedAt": "2021-03-28T07:15:39.126Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A validation error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "title": "ErrorObject",
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "title": "ErrorFieldsObject",
+                          "type": "object",
+                          "properties": {
+                            "firstName": {
+                              "type": "string"
+                            },
+                            "lastName": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "error": {
+                    "message": "Invalid fields.",
+                    "fields": {
+                      "firstName": "required",
+                      "lastName": "required"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "A not found error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "title": "ErrorObject",
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "error": {
+                    "message": "Author not found."
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "A system error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "title": "ErrorObject",
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "error": {
+                    "message": "An unknown error occurred."
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Author"
+        ],
+        "summary": "Delete Author",
+        "description": "Delete an Author with the given ID, and delete/leave all associated Rooms and Messages.",
+        "operationId": "DeleteAuthor",
+        "responses": {
+          "200": {
+            "description": "The deleted Author.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "author": {
+                      "title": "AuthorObject",
+                      "type": "object",
+                      "properties": {
+                        "_id": {
+                          "type": "uuid"
+                        },
+                        "firstName": {
+                          "type": "string"
+                        },
+                        "lastName": {
+                          "type": "string"
+                        },
+                        "isArchived": {
+                          "type": "boolean"
+                        },
+                        "createdAt": {
+                          "type": "date-time"
+                        },
+                        "updatedAt": {
+                          "type": "date-time"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "author": {
+                      "_id": "350daee5-6a5f-4489-a2a7-d4a2181cc12b",
+                      "firstName": "John",
+                      "lastName": "Doe",
+                      "isArchived": false,
+                      "createdAt": "2021-02-21T07:13:31.923Z",
+                      "updatedAt": "2021-02-28T07:15:39.126Z"
+                    }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "A not found error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "title": "ErrorObject",
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "error": {
+                    "message": "Author not found."
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "A system error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "title": "ErrorObject",
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "error": {
+                    "message": "An unknown error occurred."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/authors/{id}/archive": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "schema": {
+            "type": "uuid"
+          },
+          "description": "Author ID"
+        }
+      ],
+      "put": {
+        "tags": [
+          "Author"
+        ],
+        "summary": "Archive Author",
+        "description": "Archive an Author with the given ID, and archive/leave all associated Rooms and Messages.",
+        "operationId": "ArchiveAuthor",
+        "responses": {
+          "200": {
+            "description": "The archived Author.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "author": {
+                      "title": "AuthorObject",
+                      "type": "object",
+                      "properties": {
+                        "_id": {
+                          "type": "uuid"
+                        },
+                        "firstName": {
+                          "type": "string"
+                        },
+                        "lastName": {
+                          "type": "string"
+                        },
+                        "isArchived": {
+                          "type": "boolean"
+                        },
+                        "createdAt": {
+                          "type": "date-time"
+                        },
+                        "updatedAt": {
+                          "type": "date-time"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "author": {
+                      "_id": "350daee5-6a5f-4489-a2a7-d4a2181cc12b",
+                      "firstName": "John",
+                      "lastName": "Doe",
+                      "isArchived": true,
+                      "createdAt": "2021-02-21T07:13:31.923Z",
+                      "updatedAt": "2021-02-28T07:15:39.126Z"
+                    }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "A not found error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "title": "ErrorObject",
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "error": {
+                    "message": "Author not found."
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "A system error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "title": "ErrorObject",
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "error": {
+                    "message": "An unknown error occurred."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rooms": {
+      "post": {
+        "tags": [
+          "Room"
+        ],
+        "summary": "Create Room",
+        "description": "Create a new Room with the given body and return the new Room.",
+        "operationId": "CreateRoom",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "title": "CreateRoomObject",
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "authors": {
+                    "title": "AuthorArray",
+                    "type": "array",
+                    "items": {
+                      "title": "AuthorIdObject",
+                      "type": "object",
+                      "properties": {
+                        "_id": {
+                          "type": "uuid"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "example": {
+                "name": "Best Group",
+                "authors": [
+                  {
+                    "_id": "350daee5-6a5f-4489-a2a7-d4a2181cc12b"
+                  }
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "The new Room.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "room": {
+                      "title": "RoomObject",
+                      "type": "object",
+                      "properties": {
+                        "_id": {
+                          "type": "uuid"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "authors": {
+                          "title": "AuthorArray",
+                          "type": "array",
+                          "items": {
+                            "title": "AuthorObject",
+                            "type": "object",
+                            "properties": {
+                              "_id": {
+                                "type": "uuid"
+                              },
+                              "firstName": {
+                                "type": "string"
+                              },
+                              "lastName": {
+                                "type": "string"
+                              },
+                              "isActive": {
+                                "type": "boolean"
+                              },
+                              "isArchived": {
+                                "type": "boolean"
+                              },
+                              "createdAt": {
+                                "type": "date-time"
+                              },
+                              "updatedAt": {
+                                "type": "date-time"
+                              }
+                            }
+                          }
+                        },
+                        "isArchived": {
+                          "type": "boolean"
+                        },
+                        "createdAt": {
+                          "type": "date-time"
+                        },
+                        "updatedAt": {
+                          "type": "date-time"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "room": {
+                    "_id": "d1ce37d1-f0e8-4368-9fd0-e34048beceb4",
+                    "name": "Best Group",
+                    "authors": [
+                      {
+                        "_id": "350daee5-6a5f-4489-a2a7-d4a2181cc12b",
+                        "firstName": "John",
+                        "lastName": "Doe",
+                        "isActive": true,
+                        "isArchived": false,
+                        "createdAt": "2021-02-21T07:13:31.923Z",
+                        "updatedAt": "2021-02-28T07:15:39.126Z"
+                      }
+                    ],
+                    "isArchived": false,
+                    "createdAt": "2021-03-21T07:13:31.923Z",
+                    "updatedAt": "2021-03-21T07:13:31.923Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A validation error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "title": "ErrorObject",
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "title": "ErrorFieldsObject",
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string"
+                            },
+                            "authors": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "error": {
+                    "message": "Invalid fields.",
+                    "fields": {
+                      "name": "required",
+                      "authors": "invalid"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "A system error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "title": "ErrorObject",
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "error": {
+                    "message": "An unknown error occurred."
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Room"
+        ],
+        "summary": "Get Rooms",
+        "description": "Retrieve a list of Rooms given some query parameters.",
+        "operationId": "GetRooms",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "authorId",
+            "schema": {
+              "type": "uuid"
+            },
+            "description": "The Author ID to match against retrieved Rooms."
+          },
+          {
+            "in": "query",
+            "name": "onlyActive",
+            "schema": {
+              "type": "integer"
+            },
+            "default": 1,
+            "description": "Whether to include (0) or exclude (1) Rooms where the given Author is not active."
+          },
+          {
+            "in": "query",
+            "name": "includeArchived",
+            "schema": {
+              "type": "integer"
+            },
+            "default": 0,
+            "description": "Whether to include (1) or exclude (0) archived Rooms."
+          },
+          {
+            "in": "query",
+            "name": "updatedBefore",
+            "schema": {
+              "type": "integer"
+            },
+            "default": 8640000000000000,
+            "description": "Will only retrieve Rooms updated before this Date (in milliseconds)."
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer"
+            },
+            "default": 10,
+            "description": "Maximum number of Rooms to retrieve."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The retrieved Rooms.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "rooms": {
+                      "title": "RoomArray",
+                      "type": "array",
+                      "items": {
+                        "title": "RoomObject",
+                        "type": "object",
+                        "properties": {
+                          "_id": {
+                            "type": "uuid"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "authors": {
+                            "title": "AuthorArray",
+                            "type": "array",
+                            "items": {
+                              "title": "AuthorObject",
+                              "type": "object",
+                              "properties": {
+                                "_id": {
+                                  "type": "uuid"
+                                },
+                                "firstName": {
+                                  "type": "string"
+                                },
+                                "lastName": {
+                                  "type": "string"
+                                },
+                                "isActive": {
+                                  "type": "boolean"
+                                },
+                                "isArchived": {
+                                  "type": "boolean"
+                                },
+                                "createdAt": {
+                                  "type": "date-time"
+                                },
+                                "updatedAt": {
+                                  "type": "date-time"
+                                }
+                              }
+                            }
+                          },
+                          "isArchived": {
+                            "type": "boolean"
+                          },
+                          "createdAt": {
+                            "type": "date-time"
+                          },
+                          "updatedAt": {
+                            "type": "date-time"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "rooms": [
+                    {
+                      "_id": "d1ce37d1-f0e8-4368-9fd0-e34048beceb4",
+                      "name": "Best Group",
+                      "authors": [
+                        {
+                          "_id": "350daee5-6a5f-4489-a2a7-d4a2181cc12b",
+                          "firstName": "John",
+                          "lastName": "Doe",
+                          "isActive": true,
+                          "isArchived": false,
+                          "createdAt": "2021-02-21T07:13:31.923Z",
+                          "updatedAt": "2021-02-28T07:15:39.126Z"
+                        }
+                      ],
+                      "isArchived": false,
+                      "createdAt": "2021-03-21T07:13:31.923Z",
+                      "updatedAt": "2021-03-21T07:13:31.923Z"
+                    },
+                    {
+                      "_id": "677c597f-f0a8-489e-8012-16866fa7f31b",
+                      "name": "Decent Group",
+                      "authors": [
+                        {
+                          "_id": "6c6ca81f-82c5-483c-ad6c-6f70b1b66b8a",
+                          "firstName": "Sam",
+                          "lastName": "Smith",
+                          "isActive": true,
+                          "isArchived": false,
+                          "createdAt": "2021-03-21T07:13:31.923Z",
+                          "updatedAt": "2021-03-28T07:15:39.126Z"
+                        }
+                      ],
+                      "isArchived": false,
+                      "createdAt": "2021-04-21T07:13:31.923Z",
+                      "updatedAt": "2021-04-21T07:13:31.923Z"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "A system error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "title": "ErrorObject",
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "error": {
+                    "message": "An unknown error occurred."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rooms/{id}": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "schema": {
+            "type": "uuid"
+          },
+          "description": "Room ID"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Room"
+        ],
+        "summary": "Get Room",
+        "description": "Get a Room with the given ID.",
+        "operationId": "GetRoom",
+        "responses": {
+          "200": {
+            "description": "The retrieved Room.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "room": {
+                      "title": "RoomObject",
+                      "type": "object",
+                      "properties": {
+                        "_id": {
+                          "type": "uuid"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "authors": {
+                          "title": "AuthorArray",
+                          "type": "array",
+                          "items": {
+                            "title": "AuthorObject",
+                            "type": "object",
+                            "properties": {
+                              "_id": {
+                                "type": "uuid"
+                              },
+                              "firstName": {
+                                "type": "string"
+                              },
+                              "lastName": {
+                                "type": "string"
+                              },
+                              "isActive": {
+                                "type": "boolean"
+                              },
+                              "isArchived": {
+                                "type": "boolean"
+                              },
+                              "createdAt": {
+                                "type": "date-time"
+                              },
+                              "updatedAt": {
+                                "type": "date-time"
+                              }
+                            }
+                          }
+                        },
+                        "isArchived": {
+                          "type": "boolean"
+                        },
+                        "createdAt": {
+                          "type": "date-time"
+                        },
+                        "updatedAt": {
+                          "type": "date-time"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "room": {
+                    "_id": "d1ce37d1-f0e8-4368-9fd0-e34048beceb4",
+                    "name": "Best Group",
+                    "authors": [
+                      {
+                        "_id": "350daee5-6a5f-4489-a2a7-d4a2181cc12b",
+                        "firstName": "John",
+                        "lastName": "Doe",
+                        "isActive": true,
+                        "isArchived": false,
+                        "createdAt": "2021-02-21T07:13:31.923Z",
+                        "updatedAt": "2021-02-28T07:15:39.126Z"
+                      }
+                    ],
+                    "isArchived": false,
+                    "createdAt": "2021-03-21T07:13:31.923Z",
+                    "updatedAt": "2021-03-21T07:13:31.923Z"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "A not found error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "title": "ErrorObject",
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "error": {
+                    "message": "Room not found."
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "A system error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "title": "ErrorObject",
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "error": {
+                    "message": "An unknown error occurred."
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Room"
+        ],
+        "summary": "Update Room",
+        "description": "Update a Room with the given body and return the updated Room.",
+        "operationId": "UpdateRoom",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "title": "CreateRoomObject",
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "authors": {
+                    "title": "AuthorArray",
+                    "type": "array",
+                    "items": {
+                      "title": "AuthorIdObject",
+                      "type": "object",
+                      "properties": {
+                        "_id": {
+                          "type": "uuid"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "example": {
+                "name": "Better Group",
+                "authors": [
+                  {
+                    "_id": "6c6ca81f-82c5-483c-ad6c-6f70b1b66b8a"
+                  }
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The updated Room.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "room": {
+                      "title": "RoomObject",
+                      "type": "object",
+                      "properties": {
+                        "_id": {
+                          "type": "uuid"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "authors": {
+                          "title": "AuthorArray",
+                          "type": "array",
+                          "items": {
+                            "title": "AuthorObject",
+                            "type": "object",
+                            "properties": {
+                              "_id": {
+                                "type": "uuid"
+                              },
+                              "firstName": {
+                                "type": "string"
+                              },
+                              "lastName": {
+                                "type": "string"
+                              },
+                              "isActive": {
+                                "type": "boolean"
+                              },
+                              "isArchived": {
+                                "type": "boolean"
+                              },
+                              "createdAt": {
+                                "type": "date-time"
+                              },
+                              "updatedAt": {
+                                "type": "date-time"
+                              }
+                            }
+                          }
+                        },
+                        "isArchived": {
+                          "type": "boolean"
+                        },
+                        "createdAt": {
+                          "type": "date-time"
+                        },
+                        "updatedAt": {
+                          "type": "date-time"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "room": {
+                    "_id": "d1ce37d1-f0e8-4368-9fd0-e34048beceb4",
+                    "name": "Better Group",
+                    "authors": [
+                      {
+                        "_id": "6c6ca81f-82c5-483c-ad6c-6f70b1b66b8a",
+                        "firstName": "Sam",
+                        "lastName": "Smith",
+                        "isActive": true,
+                        "isArchived": false,
+                        "createdAt": "2021-03-21T07:13:31.923Z",
+                        "updatedAt": "2021-03-28T07:15:39.126Z"
+                      }
+                    ],
+                    "isArchived": false,
+                    "createdAt": "2021-03-21T07:13:31.923Z",
+                    "updatedAt": "2021-03-21T07:13:31.923Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A validation error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "title": "ErrorObject",
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "title": "ErrorFieldsObject",
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string"
+                            },
+                            "authors": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "error": {
+                    "message": "Invalid fields.",
+                    "fields": {
+                      "name": "required",
+                      "authors": "invalid"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "A not found error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "title": "ErrorObject",
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "error": {
+                    "message": "Room not found."
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "A system error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "title": "ErrorObject",
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "error": {
+                    "message": "An unknown error occurred."
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Room"
+        ],
+        "summary": "Delete Room",
+        "description": "Delete a Room with the given ID, and delete all associated Messages.",
+        "operationId": "DeleteRoom",
+        "responses": {
+          "200": {
+            "description": "The deleted Room.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "room": {
+                      "title": "RoomObject",
+                      "type": "object",
+                      "properties": {
+                        "_id": {
+                          "type": "uuid"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "authors": {
+                          "title": "AuthorArray",
+                          "type": "array",
+                          "items": {
+                            "title": "AuthorObject",
+                            "type": "object",
+                            "properties": {
+                              "_id": {
+                                "type": "uuid"
+                              },
+                              "firstName": {
+                                "type": "string"
+                              },
+                              "lastName": {
+                                "type": "string"
+                              },
+                              "isActive": {
+                                "type": "boolean"
+                              },
+                              "isArchived": {
+                                "type": "boolean"
+                              },
+                              "createdAt": {
+                                "type": "date-time"
+                              },
+                              "updatedAt": {
+                                "type": "date-time"
+                              }
+                            }
+                          }
+                        },
+                        "isArchived": {
+                          "type": "boolean"
+                        },
+                        "createdAt": {
+                          "type": "date-time"
+                        },
+                        "updatedAt": {
+                          "type": "date-time"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "room": {
+                    "_id": "d1ce37d1-f0e8-4368-9fd0-e34048beceb4",
+                    "name": "Better Group",
+                    "authors": [
+                      {
+                        "_id": "6c6ca81f-82c5-483c-ad6c-6f70b1b66b8a",
+                        "firstName": "Sam",
+                        "lastName": "Smith",
+                        "isActive": true,
+                        "isArchived": false,
+                        "createdAt": "2021-03-21T07:13:31.923Z",
+                        "updatedAt": "2021-03-28T07:15:39.126Z"
+                      }
+                    ],
+                    "isArchived": false,
+                    "createdAt": "2021-03-21T07:13:31.923Z",
+                    "updatedAt": "2021-03-21T07:13:31.923Z"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "A not found error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "title": "ErrorObject",
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "error": {
+                    "message": "Room not found."
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "A system error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "title": "ErrorObject",
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "error": {
+                    "message": "An unknown error occurred."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rooms/{id}/archive": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "schema": {
+            "type": "uuid"
+          },
+          "description": "Room ID"
+        }
+      ],
+      "put": {
+        "tags": [
+          "Room"
+        ],
+        "summary": "Archive Room",
+        "description": "Archive a Room with the given ID, and archive all associated Messages.",
+        "operationId": "ArchiveRoom",
+        "responses": {
+          "200": {
+            "description": "The archived Room.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "room": {
+                      "title": "RoomObject",
+                      "type": "object",
+                      "properties": {
+                        "_id": {
+                          "type": "uuid"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "authors": {
+                          "title": "AuthorArray",
+                          "type": "array",
+                          "items": {
+                            "title": "AuthorObject",
+                            "type": "object",
+                            "properties": {
+                              "_id": {
+                                "type": "uuid"
+                              },
+                              "firstName": {
+                                "type": "string"
+                              },
+                              "lastName": {
+                                "type": "string"
+                              },
+                              "isActive": {
+                                "type": "boolean"
+                              },
+                              "isArchived": {
+                                "type": "boolean"
+                              },
+                              "createdAt": {
+                                "type": "date-time"
+                              },
+                              "updatedAt": {
+                                "type": "date-time"
+                              }
+                            }
+                          }
+                        },
+                        "isArchived": {
+                          "type": "boolean"
+                        },
+                        "createdAt": {
+                          "type": "date-time"
+                        },
+                        "updatedAt": {
+                          "type": "date-time"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "room": {
+                    "_id": "d1ce37d1-f0e8-4368-9fd0-e34048beceb4",
+                    "name": "Better Group",
+                    "authors": [
+                      {
+                        "_id": "6c6ca81f-82c5-483c-ad6c-6f70b1b66b8a",
+                        "firstName": "Sam",
+                        "lastName": "Smith",
+                        "isActive": true,
+                        "isArchived": false,
+                        "createdAt": "2021-03-21T07:13:31.923Z",
+                        "updatedAt": "2021-03-28T07:15:39.126Z"
+                      }
+                    ],
+                    "isArchived": true,
+                    "createdAt": "2021-03-21T07:13:31.923Z",
+                    "updatedAt": "2021-03-21T07:13:31.923Z"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "A not found error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "title": "ErrorObject",
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "error": {
+                    "message": "Room not found."
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "A system error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "title": "ErrorObject",
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "error": {
+                    "message": "An unknown error occurred."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/messages": {
+      "post": {
+        "tags": [
+          "Message"
+        ],
+        "summary": "Create Message",
+        "description": "Create a new Message with the given body and return the new Message.",
+        "operationId": "CreateMessage",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "title": "CreateMessageObject",
+                "type": "object",
+                "required": ["roomId", "authorId", "text"],
+                "properties": {
+                  "roomId": {
+                    "type": "uuid"
+                  },
+                  "authorId": {
+                    "type": "uuid"
+                  },
+                  "text": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "roomId": "3ff628d1-da34-41ed-a8f9-fd5a2d818852",
+                "authorId": "283f45ed-83a9-4384-83a1-afdbf4a476a0",
+                "text": "Hello World!"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "The new Message.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "title": "MessageObject",
+                      "type": "object",
+                      "properties": {
+                        "_id": {
+                          "type": "uuid"
+                        },
+                        "roomId": {
+                          "type": "uuid"
+                        },
+                        "authorId": {
+                          "type": "uuid"
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "isArchived": {
+                          "type": "boolean"
+                        },
+                        "createdAt": {
+                          "type": "date-time"
+                        },
+                        "updatedAt": {
+                          "type": "date-time"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "message": {
+                    "_id": "3e1a7b79-11eb-4ae8-93e1-b066f5e887ac",
+                    "roomId": "3ff628d1-da34-41ed-a8f9-fd5a2d818852",
+                    "authorId": "283f45ed-83a9-4384-83a1-afdbf4a476a0",
+                    "text": "Hello World!",
+                    "isArchived": false,
+                    "createdAt": "2021-03-21T07:13:31.923Z",
+                    "updatedAt": "2021-03-21T07:13:31.923Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A validation error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "title": "ErrorObject",
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "title": "ErrorFieldsObject",
+                          "type": "object",
+                          "properties": {
+                            "roomId": {
+                              "type": "string"
+                            },
+                            "authorId": {
+                              "type": "string"
+                            },
+                            "text": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "error": {
+                    "message": "Invalid fields.",
+                    "fields": {
+                      "roomId": "required",
+                      "authorId": "required",
+                      "text": "required"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "A system error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "title": "ErrorObject",
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "error": {
+                    "message": "An unknown error occurred."
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Message"
+        ],
+        "summary": "Get Messages",
+        "description": "Retrieve a list of Messages given some query parameters.",
+        "operationId": "GetMessages",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "roomId",
+            "schema": {
+              "type": "uuid"
+            },
+            "description": "The Room ID to match against retrieved Messages."
+          },
+          {
+            "in": "query",
+            "name": "authorId",
+            "schema": {
+              "type": "uuid"
+            },
+            "description": "The Author ID to match against retrieved Messages."
+          },
+          {
+            "in": "query",
+            "name": "includeArchived",
+            "schema": {
+              "type": "integer"
+            },
+            "default": 0,
+            "description": "Whether to include (1) or exclude (0) archived Messages."
+          },
+          {
+            "in": "query",
+            "name": "createdBefore",
+            "schema": {
+              "type": "integer"
+            },
+            "default": 8640000000000000,
+            "description": "Will only retrieve Messages created before this Date (in milliseconds)."
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer"
+            },
+            "default": 10,
+            "description": "Maximum number of Messages to retrieve."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The retrieved Messages.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "messages": {
+                      "title": "MessageArray",
+                      "type": "array",
+                      "items": {
+                        "title": "MessageObject",
+                        "type": "object",
+                        "properties": {
+                          "_id": {
+                            "type": "uuid"
+                          },
+                          "roomId": {
+                            "type": "uuid"
+                          },
+                          "authorId": {
+                            "type": "uuid"
+                          },
+                          "text": {
+                            "type": "string"
+                          },
+                          "isArchived": {
+                            "type": "boolean"
+                          },
+                          "createdAt": {
+                            "type": "date-time"
+                          },
+                          "updatedAt": {
+                            "type": "date-time"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "messages": [
+                    {
+                      "_id": "3e1a7b79-11eb-4ae8-93e1-b066f5e887ac",
+                      "roomId": "3ff628d1-da34-41ed-a8f9-fd5a2d818852",
+                      "authorId": "283f45ed-83a9-4384-83a1-afdbf4a476a0",
+                      "text": "Hello World!",
+                      "isArchived": false,
+                      "createdAt": "2021-03-21T07:13:31.923Z",
+                      "updatedAt": "2021-03-21T07:13:31.923Z"
+                    },
+                    {
+                      "_id": "a3c25fd3-39cf-4d85-8065-bfb7e94c1b7c",
+                      "roomId": "1ee23d46-b9a8-42da-bc5c-f5355a4e753a",
+                      "authorId": "0988c492-551f-4aa1-b254-e3ede1c59458",
+                      "text": "Knock knock.",
+                      "isArchived": false,
+                      "createdAt": "2021-04-21T07:13:31.923Z",
+                      "updatedAt": "2021-04-21T07:13:31.923Z"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "A system error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "title": "ErrorObject",
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "error": {
+                    "message": "An unknown error occurred."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/messages/{id}": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "schema": {
+            "type": "uuid"
+          },
+          "description": "Message ID"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Message"
+        ],
+        "summary": "Get Message",
+        "description": "Get a Message with the given ID.",
+        "operationId": "GetMessage",
+        "responses": {
+          "200": {
+            "description": "The retrieved Message.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "title": "MessageObject",
+                      "type": "object",
+                      "properties": {
+                        "_id": {
+                          "type": "uuid"
+                        },
+                        "roomId": {
+                          "type": "uuid"
+                        },
+                        "authorId": {
+                          "type": "uuid"
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "isArchived": {
+                          "type": "boolean"
+                        },
+                        "createdAt": {
+                          "type": "date-time"
+                        },
+                        "updatedAt": {
+                          "type": "date-time"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "message": {
+                    "_id": "3e1a7b79-11eb-4ae8-93e1-b066f5e887ac",
+                    "roomId": "3ff628d1-da34-41ed-a8f9-fd5a2d818852",
+                    "authorId": "283f45ed-83a9-4384-83a1-afdbf4a476a0",
+                    "text": "Hello World!",
+                    "isArchived": false,
+                    "createdAt": "2021-03-21T07:13:31.923Z",
+                    "updatedAt": "2021-03-21T07:13:31.923Z"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "A not found error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "title": "ErrorObject",
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "error": {
+                    "message": "Message not found."
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "A system error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "title": "ErrorObject",
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "error": {
+                    "message": "An unknown error occurred."
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Message"
+        ],
+        "summary": "Update Message",
+        "description": "Update a Message with the given body and return the updated Message.",
+        "operationId": "UpdateMessage",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "title": "CreateMessageObject",
+                "type": "object",
+                "required": ["text"],
+                "properties": {
+                  "text": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "text": "Hello Steve!"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The updated Message.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "title": "MessageObject",
+                      "type": "object",
+                      "properties": {
+                        "_id": {
+                          "type": "uuid"
+                        },
+                        "roomId": {
+                          "type": "uuid"
+                        },
+                        "authorId": {
+                          "type": "uuid"
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "isArchived": {
+                          "type": "boolean"
+                        },
+                        "createdAt": {
+                          "type": "date-time"
+                        },
+                        "updatedAt": {
+                          "type": "date-time"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "message": {
+                    "_id": "3e1a7b79-11eb-4ae8-93e1-b066f5e887ac",
+                    "roomId": "3ff628d1-da34-41ed-a8f9-fd5a2d818852",
+                    "authorId": "283f45ed-83a9-4384-83a1-afdbf4a476a0",
+                    "text": "Hello Steve!",
+                    "isArchived": false,
+                    "createdAt": "2021-03-21T07:13:31.923Z",
+                    "updatedAt": "2021-04-21T07:13:31.923Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A validation error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "title": "ErrorObject",
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "title": "ErrorFieldsObject",
+                          "type": "object",
+                          "properties": {
+                            "text": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "error": {
+                    "message": "Invalid fields.",
+                    "fields": {
+                      "text": "required"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "A not found error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "title": "ErrorObject",
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "error": {
+                    "message": "Message not found."
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "A system error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "title": "ErrorObject",
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "error": {
+                    "message": "An unknown error occurred."
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Message"
+        ],
+        "summary": "Delete Message",
+        "description": "Delete a Message with the given ID.",
+        "operationId": "DeleteMessage",
+        "responses": {
+          "200": {
+            "description": "The deleted Message.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "title": "MessageObject",
+                      "type": "object",
+                      "properties": {
+                        "_id": {
+                          "type": "uuid"
+                        },
+                        "roomId": {
+                          "type": "uuid"
+                        },
+                        "authorId": {
+                          "type": "uuid"
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "isArchived": {
+                          "type": "boolean"
+                        },
+                        "createdAt": {
+                          "type": "date-time"
+                        },
+                        "updatedAt": {
+                          "type": "date-time"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "message": {
+                    "_id": "3e1a7b79-11eb-4ae8-93e1-b066f5e887ac",
+                    "roomId": "3ff628d1-da34-41ed-a8f9-fd5a2d818852",
+                    "authorId": "283f45ed-83a9-4384-83a1-afdbf4a476a0",
+                    "text": "Hello Steve!",
+                    "isArchived": false,
+                    "createdAt": "2021-03-21T07:13:31.923Z",
+                    "updatedAt": "2021-04-21T07:13:31.923Z"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "A not found error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "title": "ErrorObject",
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "error": {
+                    "message": "Message not found."
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "A system error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "title": "ErrorObject",
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "error": {
+                    "message": "An unknown error occurred."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/messages/{id}/archive": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "schema": {
+            "type": "uuid"
+          },
+          "description": "Message ID"
+        }
+      ],
+      "put": {
+        "tags": [
+          "Message"
+        ],
+        "summary": "Archive Message",
+        "description": "Archive a Message with the given ID.",
+        "operationId": "ArchiveMessage",
+        "responses": {
+          "200": {
+            "description": "The archived Message.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "title": "MessageObject",
+                      "type": "object",
+                      "properties": {
+                        "_id": {
+                          "type": "uuid"
+                        },
+                        "roomId": {
+                          "type": "uuid"
+                        },
+                        "authorId": {
+                          "type": "uuid"
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "isArchived": {
+                          "type": "boolean"
+                        },
+                        "createdAt": {
+                          "type": "date-time"
+                        },
+                        "updatedAt": {
+                          "type": "date-time"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "message": {
+                    "_id": "3e1a7b79-11eb-4ae8-93e1-b066f5e887ac",
+                    "roomId": "3ff628d1-da34-41ed-a8f9-fd5a2d818852",
+                    "authorId": "283f45ed-83a9-4384-83a1-afdbf4a476a0",
+                    "text": "Hello Steve!",
+                    "isArchived": true,
+                    "createdAt": "2021-03-21T07:13:31.923Z",
+                    "updatedAt": "2021-04-21T07:13:31.923Z"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "A not found error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "title": "ErrorObject",
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "error": {
+                    "message": "Message not found."
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "A system error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "ResponseObject",
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "title": "ErrorObject",
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "error": {
+                    "message": "An unknown error occurred."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

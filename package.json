@@ -1,0 +1,45 @@
+{
+  "name": "messaging",
+  "version": "1.0.0",
+  "main": "src/server.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "cross-env NODE_ENV=production node .",
+    "start:dev": "cross-env NODE_ENV=development node .",
+    "test:unit": "cross-env NODE_ENV=test ./node_modules/.bin/mocha './test/{,!(integration)/**}/*.test.js' --recursive -r test/hooks.js",
+    "test:integration": "cross-env NODE_ENV=test ./node_modules/.bin/mocha ./test/integration --recursive -r test/setup.js -r test/teardown.js",
+    "test": "yarn test:unit && yarn test:integration",
+    "coverage": "./node_modules/.bin/nyc yarn test"
+  },
+  "dependencies": {
+    "@asyncapi/generator": "^1.2.0",
+    "@asyncapi/html-template": "^0.18.1",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "cross-env": "^7.0.3",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "mongoose": "^5.11.16",
+    "socket.io": "^3.1.2",
+    "swagger-ui-express": "^4.1.6",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "chai": "^4.3.0",
+    "eslint": "^7.2.0",
+    "eslint-config-airbnb": "18.2.1",
+    "eslint-config-prettier": "^8.1.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jsx-a11y": "^6.4.1",
+    "eslint-plugin-prettier": "^3.3.1",
+    "eslint-plugin-react": "^7.21.5",
+    "eslint-plugin-react-hooks": "^1.7.0",
+    "mocha": "^8.3.0",
+    "mongodb-memory-server": "^6.9.3",
+    "nyc": "^15.1.0",
+    "prettier": "^2.2.1",
+    "sinon": "^10.0.0",
+    "socket.io-client": "^3.1.2",
+    "supertest": "^6.1.3"
+  }
+}
