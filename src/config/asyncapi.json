@@ -1,0 +1,1523 @@
+{
+  "asyncapi": "2.0.0",
+  "info": {
+    "title": "Messaging Service API",
+    "version": "1.0.0",
+    "description": "A service providing private and group messaging between clients.",
+    "license": {
+      "name": "MIT",
+      "url": "https://www.mit.edu/~amini/LICENSE.md"
+    }
+  },
+  "servers": {
+    "development": {
+      "url": "http://localhost:{port}/",
+      "protocol": "ws",
+      "protocolVersion": "13",
+      "description": "Local Development Server",
+      "variables": {
+        "port": {
+          "default": "3001"
+        }
+      }
+    }
+  },
+  "channels": {
+  "UPDATE_AUTHOR": {
+      "publish": {
+        "operationId": "UpdateAuthor",
+        "description": "Update an Author.\n\nArgs: [\"UPDATE_AUTHOR\", UpdateAuthorObject, cb -> {author, error}]",
+        "tags": [
+          { "name": "Author" }
+        ],
+        "message": {
+          "name": "UpdateAuthorObject",
+          "payload": {
+            "type": "object",
+            "required": ["id", "updateValues"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "updateValues": {
+                "type": "object",
+                "required": ["firstName", "lastName"],
+                "additionalProperties": false,
+                "properties": {
+                  "firstName": {
+                    "type": "string"
+                  },
+                  "lastName": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "examples": [
+            {
+              "payload": {
+                "id": "c5a053ec-cd49-4324-9028-467e47ffbba8",
+                "updateValues": {
+                  "firstName": "Sam",
+                  "lastName": "Smith"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "AUTHOR_UPDATED": {
+      "subscribe": {
+        "operationId": "UpdatedAuthor",
+        "description": "An Author was updated.",
+        "tags": [
+          { "name": "Author" }
+        ],
+        "message": {
+          "name": "UpdatedAuthorObject",
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "author": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "firstName": {
+                    "type": "string"
+                  },
+                  "lastName": {
+                    "type": "string"
+                  },
+                  "isArchived": {
+                    "type": "boolean"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "updatedAt": {
+                    "type": "string",
+                    "format": "date"
+                  }
+                }
+              }
+            }
+          },
+          "examples": [
+            {
+              "payload": {
+                "author": {
+                  "_id": "350daee5-6a5f-4489-a2a7-d4a2181cc12b",
+                  "firstName": "Sam",
+                  "lastName": "Smith",
+                  "isArchived": false,
+                  "createdAt": "2021-02-21T07:13:31.923Z",
+                  "updatedAt": "2021-03-28T07:15:39.126Z"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+  "ARCHIVE_AUTHOR": {
+      "publish": {
+        "operationId": "ArchiveAuthor",
+        "description": "Archive an Author and their associated Rooms and Messages.\n\nArgs: [\"ARCHIVE_AUTHOR\", ArchiveAuthorObject, cb -> {author, error}]",
+        "tags": [
+          { "name": "Author" }
+        ],
+        "message": {
+          "name": "ArchiveAuthorObject",
+          "payload": {
+            "type": "object",
+            "required": ["id"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          "examples": [
+            {
+              "payload": {
+                "id": "c5a053ec-cd49-4324-9028-467e47ffbba8"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "AUTHOR_ARCHIVED": {
+      "subscribe": {
+        "operationId": "ArchivedAuthor",
+        "description": "An Author and their associated Rooms and Messages were archived.",
+        "tags": [
+          { "name": "Author" }
+        ],
+        "message": {
+          "name": "ArchivedAuthorObject",
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "author": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "firstName": {
+                    "type": "string"
+                  },
+                  "lastName": {
+                    "type": "string"
+                  },
+                  "isArchived": {
+                    "type": "boolean"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "updatedAt": {
+                    "type": "string",
+                    "format": "date"
+                  }
+                }
+              }
+            }
+          },
+          "examples": [
+            {
+              "payload": {
+                "author": {
+                  "_id": "350daee5-6a5f-4489-a2a7-d4a2181cc12b",
+                  "firstName": "Sam",
+                  "lastName": "Smith",
+                  "isArchived": true,
+                  "createdAt": "2021-02-21T07:13:31.923Z",
+                  "updatedAt": "2021-03-28T07:15:39.126Z"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+  "DELETE_AUTHOR": {
+      "publish": {
+        "operationId": "DeleteAuthor",
+        "description": "Delete an Author and their associated Rooms and Messages.\n\nArgs: [\"DELETE_AUTHOR\", DeleteAuthorObject, cb -> {author, error}]",
+        "tags": [
+          { "name": "Author" }
+        ],
+        "message": {
+          "name": "DeleteAuthorObject",
+          "payload": {
+            "type": "object",
+            "required": ["id"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          "examples": [
+            {
+              "payload": {
+                "id": "c5a053ec-cd49-4324-9028-467e47ffbba8"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "AUTHOR_DELETED": {
+      "subscribe": {
+        "operationId": "DeletedAuthor",
+        "description": "An Author and their associated Rooms and Messages were deleted.",
+        "tags": [
+          { "name": "Author" }
+        ],
+        "message": {
+          "name": "DeletedAuthorObject",
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "author": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "firstName": {
+                    "type": "string"
+                  },
+                  "lastName": {
+                    "type": "string"
+                  },
+                  "isArchived": {
+                    "type": "boolean"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "updatedAt": {
+                    "type": "string",
+                    "format": "date"
+                  }
+                }
+              }
+            }
+          },
+          "examples": [
+            {
+              "payload": {
+                "author": {
+                  "_id": "350daee5-6a5f-4489-a2a7-d4a2181cc12b",
+                  "firstName": "Sam",
+                  "lastName": "Smith",
+                  "isArchived": false,
+                  "createdAt": "2021-02-21T07:13:31.923Z",
+                  "updatedAt": "2021-03-28T07:15:39.126Z"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "CREATE_ROOM": {
+      "publish": {
+        "operationId": "CreateRoom",
+        "description": "Create a new Room.\n\nArgs: [\"CREATE_ROOM\", CreateRoomObject, cb -> {room, error}]",
+        "tags": [
+          { "name": "Room" }
+        ],
+        "message": {
+          "name": "CreateRoomObject",
+          "payload": {
+            "type": "object",
+            "required": ["name"],
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "authors": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "examples": [
+            {
+              "payload": {
+                "name": "Best Group",
+                "authors": [
+                  {
+                    "_id": "350daee5-6a5f-4489-a2a7-d4a2181cc12b"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    "ROOM_CREATED": {
+      "subscribe": {
+        "operationId": "CreatedRoom",
+        "description": "A new Room was created.",
+        "tags": [
+          { "name": "Room" }
+        ],
+        "message": {
+          "name": "CreatedRoomObject",
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "room": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "authors": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "firstName": {
+                          "type": "string"
+                        },
+                        "lastName": {
+                          "type": "string"
+                        },
+                        "isActive": {
+                          "type": "boolean"
+                        },
+                        "isArchived": {
+                          "type": "boolean"
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      }
+                    }
+                  },
+                  "isArchived": {
+                    "type": "boolean"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "updatedAt": {
+                    "type": "string",
+                    "format": "date"
+                  }
+                }
+              }
+            }
+          },
+          "examples": [
+            {
+              "payload": {
+                "room": {
+                  "_id": "d1ce37d1-f0e8-4368-9fd0-e34048beceb4",
+                  "name": "Best Group",
+                  "authors": [
+                    {
+                      "_id": "350daee5-6a5f-4489-a2a7-d4a2181cc12b",
+                      "firstName": "John",
+                      "lastName": "Doe",
+                      "isActive": true,
+                      "isArchived": false,
+                      "createdAt": "2021-02-21T07:13:31.923Z",
+                      "updatedAt": "2021-02-28T07:15:39.126Z"
+                    }
+                  ],
+                  "isArchived": false,
+                  "createdAt": "2021-03-21T07:13:31.923Z",
+                  "updatedAt": "2021-03-21T07:13:31.923Z"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "JOIN_ROOM": {
+      "publish": {
+        "operationId": "JoinRoom",
+        "description": "Join a Room.\n\nArgs: [\"JOIN_ROOM\", roomToJoin]",
+        "tags": [
+          { "name": "Room" }
+        ],
+        "message": {
+          "name": "JoinRoomObject",
+          "payload": {
+            "type": "object",
+            "required": ["roomToJoin"],
+            "additionalProperties": false,
+            "properties": {
+              "roomToJoin": {
+                "type": "string"
+              }
+            }
+          },
+          "examples": [
+            {
+              "payload": {
+                "roomToJoin": "d1ce37d1-f0e8-4368-9fd0-e34048beceb4"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "ROOM_JOINED": {
+      "subscribe": {
+        "operationId": "JoinedRoom",
+        "description": "A Room was joined.",
+        "tags": [
+          { "name": "Room" }
+        ],
+        "message": {
+          "name": "JoinedRoomObject",
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "roomJoined": {
+                "type": "string"
+              }
+            }
+          },
+          "examples": [
+            {
+              "payload": {
+                "roomJoined": "d1ce37d1-f0e8-4368-9fd0-e34048beceb4"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "JOIN_ROOMS": {
+      "publish": {
+        "operationId": "JoinRooms",
+        "description": "Join Rooms.\n\nArgs: [\"JOIN_ROOMS\", roomsToJoin]",
+        "tags": [
+          { "name": "Room" }
+        ],
+        "message": {
+          "name": "JoinRoomsObject",
+          "payload": {
+            "type": "object",
+            "required": ["roomsToJoin"],
+            "additionalProperties": false,
+            "properties": {
+              "roomsToJoin": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "examples": [
+            {
+              "payload": {
+                "roomsToJoin": [
+                  "d1ce37d1-f0e8-4368-9fd0-e34048beceb4",
+                  "f06ad794-4187-4dc5-a826-8e8c08fbdd08"
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    "ROOMS_JOINED": {
+      "subscribe": {
+        "operationId": "JoinedRooms",
+        "description": "Rooms were joined.",
+        "tags": [
+          { "name": "Room" }
+        ],
+        "message": {
+          "name": "JoinedRoomsObject",
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "roomsJoined": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "examples": [
+            {
+              "payload": {
+                "roomsJoined": [
+                  "d1ce37d1-f0e8-4368-9fd0-e34048beceb4",
+                  "f06ad794-4187-4dc5-a826-8e8c08fbdd08"
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    "LEAVE_ROOM": {
+      "publish": {
+        "operationId": "LeaveRoom",
+        "description": "Leave a Room.\n\nArgs: [\"LEAVE_ROOM\", roomToLeave]",
+        "tags": [
+          { "name": "Room" }
+        ],
+        "message": {
+          "name": "LeaveRoomObject",
+          "payload": {
+            "type": "object",
+            "required": ["roomToLeave"],
+            "additionalProperties": false,
+            "properties": {
+              "roomToLeave": {
+                "type": "string"
+              }
+            }
+          },
+          "examples": [
+            {
+              "payload": {
+                "roomToLeave": "d1ce37d1-f0e8-4368-9fd0-e34048beceb4"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "ROOM_LEFT": {
+      "subscribe": {
+        "operationId": "LeftRoom",
+        "description": "A Room was left.",
+        "tags": [
+          { "name": "Room" }
+        ],
+        "message": {
+          "name": "LeftRoomObject",
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "roomLeft": {
+                "type": "string"
+              }
+            }
+          },
+          "examples": [
+            {
+              "payload": {
+                "roomLeft": "d1ce37d1-f0e8-4368-9fd0-e34048beceb4"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "LEAVE_ROOMS": {
+      "publish": {
+        "operationId": "LeaveRooms",
+        "description": "Leave Rooms.\n\nArgs: [\"LEAVE_ROOMS\", roomsToLeave]",
+        "tags": [
+          { "name": "Room" }
+        ],
+        "message": {
+          "name": "LeaveRoomsObject",
+          "payload": {
+            "type": "object",
+            "required": ["roomsToLeave"],
+            "additionalProperties": false,
+            "properties": {
+              "roomsToLeave": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "examples": [
+            {
+              "payload": {
+                "roomsToLeave": [
+                  "d1ce37d1-f0e8-4368-9fd0-e34048beceb4",
+                  "f06ad794-4187-4dc5-a826-8e8c08fbdd08"
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    "ROOMS_LEFT": {
+      "subscribe": {
+        "operationId": "LeftRooms",
+        "description": "Rooms were left.",
+        "tags": [
+          { "name": "Room" }
+        ],
+        "message": {
+          "name": "LeftRoomsObject",
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "roomsLeft": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "examples": [
+            {
+              "payload": {
+                "roomsLeft": [
+                  "d1ce37d1-f0e8-4368-9fd0-e34048beceb4",
+                  "f06ad794-4187-4dc5-a826-8e8c08fbdd08"
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    "UPDATE_ROOM": {
+      "publish": {
+        "operationId": "UpdateRoom",
+        "description": "Update a Room.\n\nArgs: [\"UPDATE_ROOM\", UpdateRoomObject, cb -> {room, error}]",
+        "tags": [
+          { "name": "Room" }
+        ],
+        "message": {
+          "name": "UpdateRoomObject",
+          "payload": {
+            "type": "object",
+            "required": ["id", "updateValues"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "updateValues": {
+                "type": "object",
+                "required": ["name"],
+                "additionalProperties": false,
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "authors": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "examples": [
+            {
+              "payload": {
+                "id": "d1ce37d1-f0e8-4368-9fd0-e34048beceb4",
+                "updateValues": {
+                  "name": "Better Group",
+                  "authors": [
+                    {
+                      "_id": "6c6ca81f-82c5-483c-ad6c-6f70b1b66b8a"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "ROOM_UPDATED": {
+      "subscribe": {
+        "operationId": "UpdatedRoom",
+        "description": "A Room was updated.",
+        "tags": [
+          { "name": "Room" }
+        ],
+        "message": {
+          "name": "UpdatedRoomObject",
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "room": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "authors": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "firstName": {
+                          "type": "string"
+                        },
+                        "lastName": {
+                          "type": "string"
+                        },
+                        "isActive": {
+                          "type": "boolean"
+                        },
+                        "isArchived": {
+                          "type": "boolean"
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      }
+                    }
+                  },
+                  "isArchived": {
+                    "type": "boolean"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "updatedAt": {
+                    "type": "string",
+                    "format": "date"
+                  }
+                }
+              }
+            }
+          },
+          "examples": [
+            {
+              "payload": {
+                "room": {
+                  "_id": "d1ce37d1-f0e8-4368-9fd0-e34048beceb4",
+                  "name": "Better Group",
+                  "authors": [
+                    {
+                      "_id": "6c6ca81f-82c5-483c-ad6c-6f70b1b66b8a",
+                      "firstName": "Sam",
+                      "lastName": "Smith",
+                      "isActive": true,
+                      "isArchived": false,
+                      "createdAt": "2021-03-21T07:13:31.923Z",
+                      "updatedAt": "2021-03-28T07:15:39.126Z"
+                    }
+                  ],
+                  "isArchived": false,
+                  "createdAt": "2021-03-21T07:13:31.923Z",
+                  "updatedAt": "2021-04-21T07:13:31.923Z"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+  "ARCHIVE_ROOM": {
+      "publish": {
+        "operationId": "ArchiveRoom",
+        "description": "Archive a Room and their associated Rooms and Rooms.\n\nArgs: [\"ARCHIVE_ROOM\", ArchiveRoomObject, cb -> {room, error}]",
+        "tags": [
+          { "name": "Room" }
+        ],
+        "message": {
+          "name": "ArchiveRoomObject",
+          "payload": {
+            "type": "object",
+            "required": ["id"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          "examples": [
+            {
+              "payload": {
+                "id": "d1ce37d1-f0e8-4368-9fd0-e34048beceb4"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "ROOM_ARCHIVED": {
+      "subscribe": {
+        "operationId": "ArchivedRoom",
+        "description": "A Room and their associated Rooms and Rooms were archived.",
+        "tags": [
+          { "name": "Room" }
+        ],
+        "message": {
+          "name": "ArchivedRoomObject",
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "room": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "authors": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "firstName": {
+                          "type": "string"
+                        },
+                        "lastName": {
+                          "type": "string"
+                        },
+                        "isActive": {
+                          "type": "boolean"
+                        },
+                        "isArchived": {
+                          "type": "boolean"
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      }
+                    }
+                  },
+                  "isArchived": {
+                    "type": "boolean"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "updatedAt": {
+                    "type": "string",
+                    "format": "date"
+                  }
+                }
+              }
+            }
+          },
+          "examples": [
+            {
+              "payload": {
+                "room": {
+                  "_id": "d1ce37d1-f0e8-4368-9fd0-e34048beceb4",
+                  "name": "Better Group",
+                  "authors": [
+                    {
+                      "_id": "6c6ca81f-82c5-483c-ad6c-6f70b1b66b8a",
+                      "firstName": "Sam",
+                      "lastName": "Smith",
+                      "isActive": true,
+                      "isArchived": false,
+                      "createdAt": "2021-03-21T07:13:31.923Z",
+                      "updatedAt": "2021-03-28T07:15:39.126Z"
+                    }
+                  ],
+                  "isArchived": true,
+                  "createdAt": "2021-03-21T07:13:31.923Z",
+                  "updatedAt": "2021-04-21T07:13:31.923Z"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+  "DELETE_ROOM": {
+      "publish": {
+        "operationId": "DeleteRoom",
+        "description": "Delete a Room and their associated Rooms and Rooms.\n\nArgs: [\"DELETE_ROOM\", DeleteRoomObject, cb -> {room, error}]",
+        "tags": [
+          { "name": "Room" }
+        ],
+        "message": {
+          "name": "DeleteRoomObject",
+          "payload": {
+            "type": "object",
+            "required": ["id"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          "examples": [
+            {
+              "payload": {
+                "id": "d1ce37d1-f0e8-4368-9fd0-e34048beceb4"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "ROOM_DELETED": {
+      "subscribe": {
+        "operationId": "DeletedRoom",
+        "description": "A Room and their associated Rooms and Rooms were deleted.",
+        "tags": [
+          { "name": "Room" }
+        ],
+        "message": {
+          "name": "DeletedRoomObject",
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "room": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "authors": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "firstName": {
+                          "type": "string"
+                        },
+                        "lastName": {
+                          "type": "string"
+                        },
+                        "isActive": {
+                          "type": "boolean"
+                        },
+                        "isArchived": {
+                          "type": "boolean"
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      }
+                    }
+                  },
+                  "isArchived": {
+                    "type": "boolean"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "updatedAt": {
+                    "type": "string",
+                    "format": "date"
+                  }
+                }
+              }
+            }
+          },
+          "examples": [
+            {
+              "payload": {
+                "room": {
+                  "_id": "d1ce37d1-f0e8-4368-9fd0-e34048beceb4",
+                  "name": "Better Group",
+                  "authors": [
+                    {
+                      "_id": "6c6ca81f-82c5-483c-ad6c-6f70b1b66b8a",
+                      "firstName": "Sam",
+                      "lastName": "Smith",
+                      "isActive": true,
+                      "isArchived": false,
+                      "createdAt": "2021-03-21T07:13:31.923Z",
+                      "updatedAt": "2021-03-28T07:15:39.126Z"
+                    }
+                  ],
+                  "isArchived": false,
+                  "createdAt": "2021-03-21T07:13:31.923Z",
+                  "updatedAt": "2021-04-21T07:13:31.923Z"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "CREATE_MESSAGE": {
+      "publish": {
+        "operationId": "CreateMessage",
+        "description": "Create a new Message.\n\nArgs: [\"CREATE_MESSAGE\", CreateMessageObject, cb -> {message, error}]",
+        "tags": [
+          { "name": "Message" }
+        ],
+        "message": {
+          "name": "CreateMessageObject",
+          "payload": {
+            "type": "object",
+            "required": ["roomId", "authorId", "text"],
+            "additionalProperties": false,
+            "properties": {
+              "roomId": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "authorId": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "text": {
+                "type": "string"
+              }
+            }
+          },
+          "examples": [
+            {
+              "payload": {
+                "roomId": "3ff628d1-da34-41ed-a8f9-fd5a2d818852",
+                "authorId": "283f45ed-83a9-4384-83a1-afdbf4a476a0",
+                "text": "Hello World!"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "MESSAGE_CREATED": {
+      "subscribe": {
+        "operationId": "CreatedMessage",
+        "description": "A new Message was created.",
+        "tags": [
+          { "name": "Message" }
+        ],
+        "message": {
+          "name": "CreatedMessageObject",
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "message": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "roomId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "authorId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "text": {
+                    "type": "string"
+                  },
+                  "isArchived": {
+                    "type": "boolean"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "updatedAt": {
+                    "type": "string",
+                    "format": "date"
+                  }
+                }
+              }
+            }
+          },
+          "examples": [
+            {
+              "payload": {
+                "message": {
+                  "_id": "3e1a7b79-11eb-4ae8-93e1-b066f5e887ac",
+                  "roomId": "3ff628d1-da34-41ed-a8f9-fd5a2d818852",
+                  "authorId": "283f45ed-83a9-4384-83a1-afdbf4a476a0",
+                  "text": "Hello World!",
+                  "isArchived": false,
+                  "createdAt": "2021-03-21T07:13:31.923Z",
+                  "updatedAt": "2021-03-21T07:13:31.923Z"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "UPDATE_MESSAGE": {
+      "publish": {
+        "operationId": "UpdateMessage",
+        "description": "Update a Message.\n\nArgs: [\"UPDATE_MESSAGE\", UpdateMessageObject, cb -> {author, error}]",
+        "tags": [
+          { "name": "Message" }
+        ],
+        "message": {
+          "name": "UpdateMessageObject",
+          "payload": {
+            "type": "object",
+            "required": ["id", "updateValues"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "updateValues": {
+                "type": "object",
+                "required": ["text"],
+                "additionalProperties": false,
+                "properties": {
+                  "text": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "examples": [
+            {
+              "payload": {
+                "id": "3e1a7b79-11eb-4ae8-93e1-b066f5e887ac",
+                "updateValues": {
+                  "text": "Hello Steve!"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "MESSAGE_UPDATED": {
+      "subscribe": {
+        "operationId": "UpdatedMessage",
+        "description": "A Message was updated.",
+        "tags": [
+          { "name": "Message" }
+        ],
+        "message": {
+          "name": "UpdatedMessageObject",
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "message": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "roomId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "authorId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "text": {
+                    "type": "string"
+                  },
+                  "isArchived": {
+                    "type": "boolean"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "updatedAt": {
+                    "type": "string",
+                    "format": "date"
+                  }
+                }
+              }
+            }
+          },
+          "examples": [
+            {
+              "payload": {
+                "message": {
+                  "_id": "3e1a7b79-11eb-4ae8-93e1-b066f5e887ac",
+                  "roomId": "3ff628d1-da34-41ed-a8f9-fd5a2d818852",
+                  "authorId": "283f45ed-83a9-4384-83a1-afdbf4a476a0",
+                  "text": "Hello World!",
+                  "isArchived": false,
+                  "createdAt": "2021-03-21T07:13:31.923Z",
+                  "updatedAt": "2021-04-21T07:13:31.923Z"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+  "ARCHIVE_MESSAGE": {
+      "publish": {
+        "operationId": "ArchiveMessage",
+        "description": "Archive a Message and their associated Rooms and Messages.\n\nArgs: [\"ARCHIVE_MESSAGE\", ArchiveMessageObject, cb -> {author, error}]",
+        "tags": [
+          { "name": "Message" }
+        ],
+        "message": {
+          "name": "ArchiveMessageObject",
+          "payload": {
+            "type": "object",
+            "required": ["id"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          "examples": [
+            {
+              "payload": {
+                "id": "3e1a7b79-11eb-4ae8-93e1-b066f5e887ac"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "MESSAGE_ARCHIVED": {
+      "subscribe": {
+        "operationId": "ArchivedMessage",
+        "description": "A Message and their associated Rooms and Messages were archived.",
+        "tags": [
+          { "name": "Message" }
+        ],
+        "message": {
+          "name": "ArchivedMessageObject",
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "message": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "roomId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "authorId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "text": {
+                    "type": "string"
+                  },
+                  "isArchived": {
+                    "type": "boolean"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "updatedAt": {
+                    "type": "string",
+                    "format": "date"
+                  }
+                }
+              }
+            }
+          },
+          "examples": [
+            {
+              "payload": {
+                "message": {
+                  "_id": "3e1a7b79-11eb-4ae8-93e1-b066f5e887ac",
+                  "roomId": "3ff628d1-da34-41ed-a8f9-fd5a2d818852",
+                  "authorId": "283f45ed-83a9-4384-83a1-afdbf4a476a0",
+                  "text": "Hello World!",
+                  "isArchived": true,
+                  "createdAt": "2021-03-21T07:13:31.923Z",
+                  "updatedAt": "2021-04-21T07:13:31.923Z"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+  "DELETE_MESSAGE": {
+      "publish": {
+        "operationId": "DeleteMessage",
+        "description": "Delete a Message and their associated Rooms and Messages.\n\nArgs: [\"DELETE_MESSAGE\", DeleteMessageObject, cb -> {author, error}]",
+        "tags": [
+          { "name": "Message" }
+        ],
+        "message": {
+          "name": "DeleteMessageObject",
+          "payload": {
+            "type": "object",
+            "required": ["id"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          "examples": [
+            {
+              "payload": {
+                "id": "3e1a7b79-11eb-4ae8-93e1-b066f5e887ac"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "MESSAGE_DELETED": {
+      "subscribe": {
+        "operationId": "DeletedMessage",
+        "description": "A Message and their associated Rooms and Messages were deleted.",
+        "tags": [
+          { "name": "Message" }
+        ],
+        "message": {
+          "name": "DeletedMessageObject",
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "message": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "roomId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "authorId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "text": {
+                    "type": "string"
+                  },
+                  "isArchived": {
+                    "type": "boolean"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "updatedAt": {
+                    "type": "string",
+                    "format": "date"
+                  }
+                }
+              }
+            }
+          },
+          "examples": [
+            {
+              "payload": {
+                "message": {
+                  "_id": "3e1a7b79-11eb-4ae8-93e1-b066f5e887ac",
+                  "roomId": "3ff628d1-da34-41ed-a8f9-fd5a2d818852",
+                  "authorId": "283f45ed-83a9-4384-83a1-afdbf4a476a0",
+                  "text": "Hello World!",
+                  "isArchived": false,
+                  "createdAt": "2021-03-21T07:13:31.923Z",
+                  "updatedAt": "2021-04-21T07:13:31.923Z"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}
