@@ -7,7 +7,7 @@ The Messaging Service provides private and group messaging between clients.
 Use [git](https://git-scm.com/) to clone this service:
 
 ```bash
-git clone [REPOSITORY_URL]
+git clone https://github.com/Derplicity/messaging-service.git
 ```
 
 ## Usage
